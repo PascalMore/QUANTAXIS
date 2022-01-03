@@ -1,8 +1,9 @@
-FROM daocloud.io/quantaxis/qa-jupyter:latest
+FROM ghcr.io/yutiansut/quantaxis/qa-jupyer:latest
 USER root
 ENV TZ=Asia/Shanghai
 ENV DEBIAN_FRONTEND noninteractive
 
+ADD VUWHL /VUWHL/
 COPY daily_update /etc/cron.d/daily_update
 COPY run-community.sh /root/
 COPY runcelery.sh /root/
@@ -11,15 +12,17 @@ COPY wait_for_it.sh /root/
 RUN cd /root && git clone https://gitee.com/yutiansut/qamazing_community && cd qamazing_community \
 && pip install quantaxis-servicedetect quantaxis-pubsub quantaxis quantaxis_webserver quantaxis_run qifimanager qavifiserver eventlet  -U -i https://pypi.doubanio.com/simple\
 && pip uninstall pytdx -y \
-&& pip install pytdx -i https://pypi.doubanio.com/simple\
+&& cd /VUWHL/ \
+&& pip install pytdx-1.72r2-py3-none-any.whl\
 && pip install qifiaccount QAStrategy -U -i https://pypi.doubanio.com/simple\
+&& cd /root/qamazing_community/ \
 && pip install qgrid -i https://pypi.doubanio.com/simple && pip install "dask[complete]" -i https://pypi.doubanio.com/simple
 
 
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
     PATH=/usr/local/cargo/bin:$PATH \
-    RUST_VERSION=1.48.0
+    RUST_VERSION=1.55.0
     #https://cmake.org/files/v3.19/cmake-3.19.0-Linux-x86_64.tar.gz
 ARG CMAKE_VERSION=3.19.0
 WORKDIR /tmp
@@ -71,6 +74,7 @@ RUN set -eux; \
     tar xvf go1.15.6.linux-amd64.tar.gz ;\
     chown -R root:root ./go ;\
     mv go /usr/lib/go-1.15;\
+    go env -w GOPROXY=https://goproxy.cn;\ 
     go get -u github.com/gopherdata/gophernotes;\
     cp /root/go/bin/gophernotes /usr/local/bin/ ;\
     mkdir -p /root/.local/share/jupyter/kernels/gophernotes ;\
@@ -84,14 +88,19 @@ RUN set -eux; \
 ## run build for tensorflow 2
 ENV GOPROXY=https://goproxy.io
 RUN conda install --yes tensorflow 
-RUN pip install tornado==5.1.1 -i https://pypi.doubanio.com/simple && conda install --yes keras \
-    && pip install QAStrategy quantaxis quantaxis_run qifiaccount -U -i https://pypi.doubanio.com/simple
-
-RUN apt-get update && apt-get -y install libcurl4-openssl-dev iputils-ping libssl-dev  build-essential net-tools htop\
+RUN pip install tornado==5.1.1 -i https://pypi.doubanio.com/simple \
+    && conda install --yes keras \
+    && pip install QAStrategy quantaxis_run qifiaccount -U -i https://pypi.doubanio.com/simple \
+    && cd /VUWHL/ \
+    && pip install quantaxis-1.10.19r1-py3-none-any.whl 
+    
+RUN apt-get update && apt-get -y install libcurl4-openssl-dev  libssl-dev  build-essential net-tools htop\
     && cd /root/ && wget https://github.com/QUANTAXIS/QUANTAXIS/releases/download/1.10.2/portfoliohandler\
     && chmod +777 /root/portfoliohandler
 
 
+
 WORKDIR /root
-EXPOSE 80 8010 8787 8020 8029 8018 8019 8028
+EXPOSE 80 8010 8787 8020 8029 8018 8019 8028 8080
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 CMD ["/bin/bash", "/root/run-community.sh"]
