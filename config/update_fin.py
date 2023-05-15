@@ -27,7 +27,9 @@
 
 """对应于save x
 """
-from QUANTAXIS.QASU.main import (QA_SU_save_financialfiles_fromtdx)
+#from QUANTAXIS.QASU.main import (QA_SU_save_financialfiles_fromtdx)
+from QUANTAXIS.QASU.main import (QA_SU_save_financialfiles)
 
 if __name__ == '__main__':
-    QA_SU_save_financialfiles_fromtdx()
+    #QA_SU_save_financialfiles_fromtdx()
+    QA_SU_save_financialfiles()

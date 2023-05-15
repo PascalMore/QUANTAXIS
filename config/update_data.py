@@ -25,16 +25,34 @@
 # SOFTWARE.
 
 import datetime
-from QUANTAXIS import (QA_SU_save_etf_day, QA_SU_save_index_day, QA_SU_save_stock_min,
+from QUANTAXIS import (QA_SU_save_etf_list, QA_SU_save_etf_day, QA_SU_save_index_list, QA_SU_save_index_day, QA_SU_save_stock_min,
                        QA_SU_save_stock_block, QA_SU_save_stock_day,QA_SU_save_etf_min,
-                       QA_SU_save_stock_list, QA_SU_save_stock_xdxr,
-                       QA_util_log_info)
+                       QA_SU_save_stock_list, QA_SU_save_stock_xdxr)
+
 
 print('SAVE/UPDATE {}'.format(datetime.datetime.now()))
 
-QA_SU_save_stock_day('tdx')
-QA_SU_save_stock_xdxr('tdx')
-QA_SU_save_etf_day('tdx')
-QA_SU_save_index_day('tdx')
-QA_SU_save_stock_list('tdx')
-QA_SU_save_stock_block('tdx')
+wk = datetime.datetime.now().weekday() + 1
+if wk == 6 or wk ==7:
+    print('周{}不更新A股数据'.format(wk))
+
+else:
+    #1. 更新最新股票、板块、ETF、指数列表
+    QA_SU_save_stock_list('tdx')
+    QA_SU_save_stock_block('tdx')
+    QA_SU_save_etf_list('tdx')
+    QA_SU_save_index_list('tdx')
+
+    #2. 更新每日的股票行情（日、分红除权、分钟）
+    QA_SU_save_stock_day('tdx')
+    QA_SU_save_stock_xdxr('tdx')
+
+    #3. 更新ETF和指数日行情
+    QA_SU_save_etf_day('tdx')
+    QA_SU_save_index_day('tdx')
+
+    # 4. 更新币安数字货币所数据
+    #QA_SU_save_binance_symbol()
+    #QA_SU_save_binance_1day()
+    #QA_SU_save_binance_1hour()
+    #QA_SU_save_binance('30m')

@@ -247,10 +247,60 @@ def QA_fetch_get_stock_block():
     except:
         return None
 
-# test
+def QA_fetch_get_daily_basic(name='', start='', end='', td= '', type_='pd'):
+    def fetch_data():
+        data = None
+        try:
+            time.sleep(0.3)
+            pro = get_pro()
+            data = pro.daily_basic(ts_code=str(name),start_date=start, end_date=end,  trade_date=td, fields=[
+                "ts_code",
+                "trade_date",
+                "turnover_rate",
+                "turnover_rate_f",
+                "pe",
+                "pe_ttm",
+                "pb",
+                "ps",
+                "ps_ttm",
+                "dv_ratio",
+                "dv_ttm",
+                "total_share",
+                "float_share",
+                "free_share",
+                "total_mv",
+                "circ_mv",
+                'limit_status'])
+            print('fetch done: ' + str(name))
+        except Exception as e:
+            print(e)
+            print('except when fetch data of ' + str(name))
+            time.sleep(1)
+            data = fetch_data()
+        return data
 
+    data = fetch_data()
+    
+    data['date_stamp'] = data['trade_date'].apply(lambda x: cover_time(x))
+    data['code'] = data['ts_code'].apply(lambda x: str(x)[0:6])
+    if type_ in ['json']:
+        # 删除原来的冗余的ts_code和trade_date
+        data=data.drop(labels=['ts_code',"trade_date"],axis=1)
+        data_json = QA_util_to_json_from_pandas(data)
+        return data_json
+    elif type_ in ['pd', 'pandas', 'p']:
+        data['date'] = pd.to_datetime(data['trade_date'], utc=False, format='%Y%m%d')
+        data = data.set_index('date', drop=False)
+        data['date'] = data['date'].apply(lambda x: str(x)[0:10])
+        # 删除原来的冗余的ts_code和trade_date
+        data=data.drop(labels=['ts_code',"trade_date"],axis=1)
+        return data
+
+# test
 # print(get_stock_day("000001",'2001-01-01','2010-01-01'))
 # print(get_stock_tick("000001.SZ","2017-02-21"))
 if __name__ == '__main__':
-    df = QA_fetch_get_stock_list()
+    #df = QA_fetch_get_stock_list()
+    #df = QA_fetch_get_daily_basic('','','','20220221')
+    df = QA_fetch_get_daily_basic('300911.SZ','20220201','20220221')
     print(df)
