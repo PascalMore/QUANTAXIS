@@ -2765,5 +2765,8 @@ if __name__ == '__main__':
     # print(QA_fetch_get_stock_transaction('000001', '2017-07-03', '2017-07-10'))
 
     # print(QA_fetch_get_stock_info('600116'))
+    # 【2022/06/11 fix】： 如果出现ip服务器错误，就运行下面的select_best_ip
+    # best_ip = select_best_ip()
+    # print(best_ip)
     rows = QA_fetch_get_hkstock_list()
     print(rows)

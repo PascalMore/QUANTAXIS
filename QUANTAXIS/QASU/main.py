@@ -221,6 +221,22 @@ def QA_SU_save_stock_day(engine, client=DATABASE, paralleled=False):
     engine = select_save_engine(engine, paralleled=paralleled)
     engine.QA_SU_save_stock_day(client=client)
 
+@print_used_time
+def QA_SU_save_stock_day_extend(engine, client=DATABASE, paralleled=False):
+    """save stock_day
+
+    Arguments:
+        engine {[type]} -- [description]
+
+    Keyword Arguments:
+        client {[type]} -- [description] (default: {DATABASE})
+
+    :param paralleled: 是否并行处理(default: {True})
+    """
+
+    engine = select_save_engine(engine, paralleled=paralleled)
+    engine.QA_SU_save_stock_day_extend(client=client)
+
 
 def QA_SU_save_single_stock_day(code, engine, client=DATABASE, paralleled=False):
     """save stock_day

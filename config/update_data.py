@@ -26,7 +26,7 @@
 
 import datetime
 from QUANTAXIS.QASU.main import (QA_SU_save_etf_list, QA_SU_save_etf_day, QA_SU_save_index_list, QA_SU_save_index_day, QA_SU_save_stock_min,
-                       QA_SU_save_stock_block, QA_SU_save_stock_day,QA_SU_save_etf_min,
+                       QA_SU_save_stock_block, QA_SU_save_stock_day,QA_SU_save_stock_day_extend,QA_SU_save_etf_min,
                        QA_SU_save_stock_list, QA_SU_save_stock_xdxr)
 
 from QUANTAXIS.QASU.save_binance import (QA_SU_save_binance_symbol,
@@ -57,13 +57,16 @@ else:
     #2. 更新每日的股票行情（日、分红除权、分钟）
     QA_SU_save_stock_day('tdx')
     QA_SU_save_stock_xdxr('tdx')
-    QA_SU_save_stock_min('tdx')
+    
+    #3. 更新每日行情衍生指标(tushare)
+    QA_SU_save_stock_day_extend('ts')
+    #QA_SU_save_stock_min('tdx')
 
-    #3. 更新ETF和指数日行情
+    #4. 更新ETF和指数日行情
     QA_SU_save_etf_day('tdx')
     QA_SU_save_index_day('tdx')
-
-    # 4. 更新币安数字货币所数据
+    
+    #5. 更新币安数字货币所数据
     #QA_SU_save_binance_symbol()
     #QA_SU_save_binance_1day()
     #QA_SU_save_binance_1hour()
