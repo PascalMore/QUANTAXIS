@@ -1439,32 +1439,36 @@ def QA_fetch_get_tdx_industry(data_dir=None, incon_block_info=None):
 
 
 """
-http://www.tdx.com.cn/page_46.html
+http://www.tdx.com.cn/page_46.html (2023/6/7:更新市场信息,通过调用QA_fetch_get_extensionmarket_info整理)
     market  category      name short_name
         1         1       临时股         TP
 ## 期权 OPTION
         4        12    郑州商品期权         OZ
         5        12    大连商品期权         OD
         6        12    上海商品期权         OS
-        7        12     中金所期权         OJ
+        7        12     中金所期权          OJ
         8        12    上海股票期权         QQ
-        9        12    深圳股票期权      (推测)
+        9        12    深圳股票期权         SQ
 ## 汇率 EXCHANGERATE
        10         4      基本汇率         FE
        11         4      交叉汇率         FX
 ## 全球 GLOBALMARKET
-       37        11  全球指数(静态)         FW
+       #37        11  全球指数(静态)         FW
        12         5      国际指数         WI
-       13         3     国际贵金属         GO
-       14         3      伦敦金属         LM
-       15         3      伦敦石油         IP
-       16         3      纽约商品         CO
-       17         3      纽约石油         NY
-       18         3      芝加哥谷         CB
-       19         3     东京工业品         TO
-       20         3      纽约期货         NB
-       77         3     新加坡期货         SX
-       39         3      马来期货         ML
+       #13         3     国际贵金属         GO
+       #14         3      伦敦金属         LM
+       #15         3      伦敦石油         IP
+       16         3      纽约COMEX        CO
+       17         3      纽约NYMEX        NY
+       18         3      芝加哥CBOT       CB
+       #19         3     东京工业品         TO
+       #20         3      纽约期货         NB
+       #77         3     新加坡期货         SX
+       #39         3      马来期货         ML
+       23         3       香港金融期货     PR
+       24         12      香港金融期权     PJ
+       25         3       香港股票期货     PR
+       26         12      香港股票期权     PQ
 # 港股 HKMARKET
        27         5      香港指数         FH
        31         2      香港主板         KH
@@ -1477,6 +1481,8 @@ http://www.tdx.com.cn/page_46.html
        28         3      郑州商品         QZ
        29         3      大连商品         QD
        30         3      上海期货         QS
+       66         3      广州期货         QG
+       67        12      广州期权         OG
        46        11      上海黄金         SG
        47         3     中金所期货         CZ
        50         3      渤海商品         BH
@@ -1484,8 +1490,8 @@ http://www.tdx.com.cn/page_46.html
 ## 基金
        33         8     开放式基金         FU
        34         9     货币型基金         FB
-       35         8  招商理财产品         LC
-       36         9  招商货币产品         LB
+       #35         8  招商理财产品         LC
+       #36         9  招商货币产品         LB
        56         8    阳光私募基金         TA
        57         8    券商集合理财         TB
        58         9    券商货币理财         TC
@@ -1498,6 +1504,8 @@ http://www.tdx.com.cn/page_46.html
        44         1      股转系统         SB
        54         6     国债预发行         GY
        62         5      中证指数         ZZ
+       69         5      华证指数         BZ
+       102        5      国证指数         GZ
        70         5    扩展板块指数         UZ
        71         2     港股通             GH
 """
@@ -1584,6 +1592,33 @@ def QA_fetch_get_globalindex_list(ip=None, port=None):
 
     return extension_market_list.query('market==12 or market==37')
 
+@retry(stop_max_attempt_number=3, wait_random_min=50, wait_random_max=100)
+def QA_fetch_get_extensionindex_list(ip=None, port=None):
+    """扩展指数列表
+    Keyword Arguments:
+        ip {[type]} -- [description] (default: {None})
+        port {[type]} -- [description] (default: {None})
+       12         5      国际指数         WI
+       42         3      商品指数         TI
+       62         5      中证指数         ZZ
+       69         5      华证指数         BZ
+    """
+    global extension_market_list
+    extension_market_list = QA_fetch_get_extensionmarket_list(
+    ) if extension_market_list is None else extension_market_list
+
+    data = extension_market_list.query('market==12 or market==42 or market==62  or market==69')
+    data = data.drop_duplicates()
+    data['sec'] = data['market'].apply(lambda x: 'index_wi' if x == 12 else 'index_ci' if x == 42 else 'index_bz' if x == 69 else 'index_zz' )
+    data['sse'] = data['market'].apply(lambda x: 'wi' if x == 12 else 'ci' if x == 42 else 'bz' if x == 69 else 'zz' )
+    data['sse'] = data.apply(lambda x: x['sse'] if x['sse'] != 'zz' else 'sz' if str(x['code'])[0:2] in ['39'] else 'sh' if str(x['code'])[0:3] in ['000', '880'] else x['sse'], axis=1)  
+    data['volunit'] = 100
+    data['decimal_point'] = 2
+    data['pre_close'] = ""
+    data = data.loc[:,['code','volunit','decimal_point','name','pre_close','sse','sec']].set_index(
+                ['code','sse'], drop=False)
+
+    return data
 
 def QA_fetch_get_goods_list(ip=None, port=None):
     """[summary]
@@ -2742,6 +2777,7 @@ QA_fetch_get_macroindex_min = QA_fetch_get_future_min
 QA_fetch_get_globalindex_day = QA_fetch_get_future_day
 QA_fetch_get_globalindex_min = QA_fetch_get_future_min
 
+QA_fetch_get_extensionindex_day = QA_fetch_get_future_day
 
 def QA_fetch_get_wholemarket_list():
     hq_codelist = QA_fetch_get_stock_list(
@@ -2759,14 +2795,14 @@ if __name__ == '__main__':
     #print(rows)
 
     #print(QA_fetch_get_stock_day('000001', '2017-07-03', '2017-07-10'))
-    #print(QA_fetch_get_stock_day('000001', '2013-07-01', '2013-07-09'))
+    #print(QA_fetch_get_stock_day('000001', '2023-01-01', '2023-06-01'))
     # print(QA_fetch_get_stock_realtime('000001'))
-    # print(QA_fetch_get_index_day('000001', '2017-01-01', '2017-07-01'))
+   # print(QA_fetch_get_index_day('000001', '2023-01-01', '2023-06-01'))
     # print(QA_fetch_get_stock_transaction('000001', '2017-07-03', '2017-07-10'))
 
     # print(QA_fetch_get_stock_info('600116'))
     # 【2022/06/11 fix】： 如果出现ip服务器错误，就运行下面的select_best_ip
     # best_ip = select_best_ip()
     # print(best_ip)
-    rows = QA_fetch_get_hkstock_list()
+    rows = QA_fetch_get_stock_list('index')
     print(rows)

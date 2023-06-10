@@ -40,6 +40,8 @@ from QUANTAXIS.QAFetch.QATdx import (
     QA_fetch_get_stock_list,
     QA_fetch_get_future_list,
     QA_fetch_get_index_list,
+    QA_fetch_get_extensionindex_list,
+    QA_fetch_get_extensionindex_day,
     QA_fetch_get_future_day,
     QA_fetch_get_future_min,
     QA_fetch_get_stock_min,
@@ -1152,6 +1154,118 @@ def QA_SU_save_index_day(client=DATABASE, ui_log=None, ui_progress=None):
         QA_util_log_info(' ERROR CODE \n ', ui_log=ui_log)
         QA_util_log_info(err, ui_log=ui_log)
 
+def QA_SU_save_extension_index_day(client=DATABASE, ui_log=None, ui_progress=None):
+    """save extension index_day
+
+    Keyword Arguments:
+        client {[type]} -- [description] (default: {DATABASE})
+    """
+
+    __exindex_list = QA_fetch_get_extensionindex_list()
+    # 2023/06/10 特殊处理，__index_list去掉重复的中证指数代码
+    __zzindex_list = QA_fetch_get_stock_list('index')
+    __index_list = __exindex_list.loc[pd.concat([__exindex_list, __zzindex_list, __zzindex_list]).index.drop_duplicates(keep=False)]
+
+    coll = client.index_day
+    coll.create_index(
+        [('code',
+          pymongo.ASCENDING),
+         ('date_stamp',
+          pymongo.ASCENDING)]
+    )
+    err = []
+
+    def __saving_work(code, coll):
+        try:
+            ref_ = coll.find({'code': str(code)})
+            end_time = str(now_time())[0:10]
+            if ref_.count() > 0:
+                start_time = ref_[ref_.count() - 1]['date']
+
+                QA_util_log_info(
+                    '##JOB21 Now Saving EXTENSION INDEX_DAY==== \n Trying updating {} from {} to {}'
+                        .format(code,
+                                start_time,
+                                end_time),
+                    ui_log=ui_log
+                )
+
+                if start_time != end_time:
+                    # 2023/06/10 特殊处理，为了兼容index_day表结构，extension index day中position->vol, trade->up_count,price->down_count
+                    data_df = QA_fetch_get_extensionindex_day(str(code), QA_util_get_next_day(start_time), end_time)
+                    data_df.rename(columns = {'position': 'vol', 'trade': 'up_count', 'price':'down_count'}, inplace = True)
+                    data_df = data_df[['open', 'close', 'high', 'low', 'vol', 'amount', 'up_count', 'down_count', 'date', 'code', 'date_stamp']]
+                    coll.insert_many(
+                        QA_util_to_json_from_pandas(
+                            data_df
+                        )
+                    )
+            else:
+                try:
+                    start_time = '1990-01-01'
+                    QA_util_log_info(
+                        '##JOB21 Now Saving EXNTENSION INDEX_DAY==== \n Trying updating {} from {} to {}'
+                            .format(code,
+                                    start_time,
+                                    end_time),
+                        ui_log=ui_log
+                    )
+                    # 2023/06/10 特殊处理，为了兼容index_day表结构，extension index day中position->vol, trade->up_count,price->down_count
+                    data_df = QA_fetch_get_extensionindex_day(str(code), start_time, end_time)
+                    data_df.rename(columns = {'position': 'vol', 'trade': 'up_count', 'price':'down_count'}, inplace = True)
+                    data_df = data_df[['open', 'close', 'high', 'low', 'vol', 'amount', 'up_count', 'down_count', 'date', 'code', 'date_stamp']]
+                    coll.insert_many(
+                        QA_util_to_json_from_pandas(
+                           data_df
+                        )
+                    )
+                except:
+                    start_time = '2009-01-01'
+                    QA_util_log_info(
+                        '##JOB21 Now Saving EXTENSION INDEX_DAY==== \n Trying updating {} from {} to {}'
+                            .format(code,
+                                    start_time,
+                                    end_time),
+                        ui_log=ui_log
+                    )
+                    # 2023/06/10 特殊处理，为了兼容index_day表结构，extension index day中position->vol, trade->up_count,price->down_count
+                    data_df = QA_fetch_get_extensionindex_day(str(code), start_time, end_time)
+                    data_df.rename(columns = {'position': 'vol', 'trade': 'up_count', 'price':'down_count'}, inplace = True)
+                    data_df = data_df[['open', 'close', 'high', 'low', 'vol', 'amount', 'up_count', 'down_count', 'date', 'code', 'date_stamp']]
+                    coll.insert_many(
+                        QA_util_to_json_from_pandas(
+                           data_df
+                        )
+                    )
+        except Exception as e:
+            QA_util_log_info(e, ui_log=ui_log)
+            err.append(str(code))
+            QA_util_log_info(err, ui_log=ui_log)
+
+    for i_ in range(len(__index_list)):
+        # __saving_work('000001')
+        QA_util_log_info(
+            'The {} of Total {}'.format(i_,
+                                        len(__index_list)),
+            ui_log=ui_log
+        )
+
+        strLogProgress = 'DOWNLOAD PROGRESS {} '.format(
+            str(float(i_ / len(__index_list) * 100))[0:4] + '%'
+        )
+        intLogProgress = int(float(i_ / len(__index_list) * 10000.0))
+        QA_util_log_info(
+            strLogProgress,
+            ui_log=ui_log,
+            ui_progress=ui_progress,
+            ui_progress_int_value=intLogProgress
+        )
+        __saving_work(__index_list.index[i_][0], coll)
+    if len(err) < 1:
+        QA_util_log_info('SUCCESS', ui_log=ui_log)
+    else:
+        QA_util_log_info(' ERROR CODE \n ', ui_log=ui_log)
+        QA_util_log_info(err, ui_log=ui_log)
 
 def QA_SU_save_index_min(client=DATABASE, ui_log=None, ui_progress=None):
     """save index_min
@@ -5800,6 +5914,19 @@ def QA_SU_save_index_list(client=DATABASE, ui_log=None, ui_progress=None):
     except:
         pass
 
+def QA_SU_save_extension_index_list(client=DATABASE, ui_log=None, ui_progress=None):
+    index_list = QA_fetch_get_extensionindex_list()
+    coll_index_list = client.index_list
+    coll_index_list.create_index("code", unique=True)
+
+    try:
+        coll_index_list.insert_many(
+            QA_util_to_json_from_pandas(index_list),
+            ordered=False
+        )
+    except:
+        pass
+
 def QA_SU_save_single_future_day(code : str, client=DATABASE, ui_log=None, ui_progress=None):
     '''
      save single_future_day
@@ -7866,4 +7993,6 @@ if __name__ == '__main__':
     # QA_SU_save_usstock_list()
     # QA_SU_save_single_usstock_day(code ='YDEC')
     # QA_SU_save_usstock_day()
-    QA_SU_save_single_usstock_min(code ='YDEC')
+    #QA_SU_save_extension_index_list()
+    #QA_SU_save_single_usstock_min(code ='YDEC')
+    QA_SU_save_extension_index_day()

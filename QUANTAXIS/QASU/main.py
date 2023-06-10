@@ -94,6 +94,18 @@ def QA_SU_save_index_list(engine, client=DATABASE):
     engine = select_save_engine(engine)
     engine.QA_SU_save_index_list(client=client)
 
+def QA_SU_save_extension_index_list(engine, client=DATABASE):
+    """save index_list
+
+    Arguments:
+        engine {[type]} -- [description]
+
+    Keyword Arguments:
+        client {[type]} -- [description] (default: {DATABASE})
+    """
+
+    engine = select_save_engine(engine)
+    engine.QA_SU_save_extension_index_list(client=client)
 
 def QA_SU_save_etf_list(engine, client=DATABASE):
     """save etf_list
@@ -426,6 +438,21 @@ def QA_SU_save_index_day(engine, client=DATABASE, paralleled=False):
     engine = select_save_engine(engine, paralleled=paralleled)
     engine.QA_SU_save_index_day(client=client)
 
+@print_used_time
+def QA_SU_save_extension_index_day(engine, client=DATABASE, paralleled=False):
+    """save index_day
+
+    Arguments:
+        engine {[type]} -- [description]
+
+    Keyword Arguments:
+        client {[type]} -- [description] (default: {DATABASE})
+
+    :param paralleled: 是否并行处理(default: {True})
+    """
+
+    engine = select_save_engine(engine, paralleled=paralleled)
+    engine.QA_SU_save_extension_index_day(client=client)
 
 def QA_SU_save_single_index_day(code, engine, client=DATABASE, paralleled=False):
     """save index_day
