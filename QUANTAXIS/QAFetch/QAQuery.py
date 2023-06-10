@@ -561,7 +561,8 @@ def QA_fetch_index_day(
     '获取指数日线'
     start = str(start)[0:10]
     end = str(end)[0:10]
-    code = QA_util_code_tolist(code)
+    # 2023/6/10：由于增加了很多扩展指数，因此代码不需要自动补全
+    code = QA_util_code_tolist(code, False)
     if QA_util_date_valid(end) == True:
 
         cursor = collections.find(
