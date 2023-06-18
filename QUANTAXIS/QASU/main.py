@@ -30,6 +30,7 @@ from QUANTAXIS.QASU import save_gm as sgm
 from QUANTAXIS.QASU import save_jq as sjq
 from QUANTAXIS.QASU import save_tushare as sts
 from QUANTAXIS.QASU import save_financialfiles
+from QUANTAXIS.QASU import save_akshare as sak
 from QUANTAXIS.QAUtil import DATABASE, print_used_time
 import time
 
@@ -93,6 +94,21 @@ def QA_SU_save_index_list(engine, client=DATABASE):
 
     engine = select_save_engine(engine)
     engine.QA_SU_save_index_list(client=client)
+
+
+def QA_SU_save_swindex_list(engine, client=DATABASE):
+    """save index_list
+
+    Arguments:
+        engine {[type]} -- [description]
+
+    Keyword Arguments:
+        client {[type]} -- [description] (default: {DATABASE})
+    """
+
+    engine = select_save_engine(engine)
+    engine.QA_SU_save_swindex_list(client=client)
+
 
 def QA_SU_save_extension_index_list(engine, client=DATABASE):
     """save index_list
@@ -603,6 +619,8 @@ def select_save_engine(engine, paralleled=False):
         return sgm
     elif engine in ['jq', 'joinquant']:
         return sjq
+    elif engine in ['ak']:
+        return sak
     else:
         print(
             'QA Error QASU.main.py call select_save_engine \

@@ -1609,7 +1609,7 @@ def QA_fetch_get_extensionindex_list(ip=None, port=None):
 
     data = extension_market_list.query('market==12 or market==42 or market==62  or market==69')
     data = data.drop_duplicates()
-    data['sec'] = data['market'].apply(lambda x: 'index_wi' if x == 12 else 'index_ci' if x == 42 else 'index_bz' if x == 69 else 'index_zz' )
+    data['sec'] = data['market'].apply(lambda x: 'index_wi' if x == 12 else 'index_ci' if x == 42 else 'index_cn' )
     data['sse'] = data['market'].apply(lambda x: 'wi' if x == 12 else 'ci' if x == 42 else 'bz' if x == 69 else 'zz' )
     data['sse'] = data.apply(lambda x: x['sse'] if x['sse'] != 'zz' else 'sz' if str(x['code'])[0:2] in ['39'] else 'sh' if str(x['code'])[0:3] in ['000', '880'] else x['sse'], axis=1)  
     data['volunit'] = 100
