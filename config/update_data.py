@@ -25,7 +25,7 @@
 # SOFTWARE.
 
 import datetime
-from QUANTAXIS.QASU.main import (QA_SU_save_etf_list, QA_SU_save_etf_day, QA_SU_save_index_list, QA_SU_save_index_day, QA_SU_save_extension_index_list, QA_SU_save_extension_index_day, QA_SU_save_stock_min,
+from QUANTAXIS.QASU.main import (QA_SU_save_etf_list, QA_SU_save_etf_day, QA_SU_save_index_list, QA_SU_save_index_day, QA_SU_save_extension_index_list, QA_SU_save_swindex_list, QA_SU_save_extension_index_day, QA_SU_save_stock_min,
                        QA_SU_save_stock_block, QA_SU_save_stock_day,QA_SU_save_stock_day_extend,QA_SU_save_etf_min,
                        QA_SU_save_stock_list, QA_SU_save_stock_xdxr)
 
@@ -54,6 +54,7 @@ else:
     #3. 更新ETF和指数日行情
     QA_SU_save_etf_day('tdx')
     QA_SU_save_index_day('tdx')
+    QA_SU_save_extension_index_day('tdx')
     
     #5. 更新币安数字货币所数据
     #QA_SU_save_binance_symbol()

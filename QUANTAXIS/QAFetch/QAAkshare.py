@@ -25,7 +25,52 @@
 import json
 import pandas as pd
 import time
+import datetime
 import akshare as ak
+import requests
+
+def QA_fetch_get_swindex_day_1(code, start_date, end_date):
+    """获取申万一级及二级行业历史行情
+    """
+    def fetch_swindex_day_1(code, start_date, end_date):
+        sw_day_1 = None
+        try:
+            sw_day_1 = ak.index_level_one_hist_sw(code)
+            sw_day_1['发布日期'] = sw_day_1['发布日期'].apply(lambda x: x.strftime('%Y-%m-%d'))
+            sw_day_1 = sw_day_1.loc[(sw_day_1['发布日期'] >= start_date) & (sw_day_1['发布日期'] <= end_date),['发布日期', '指数代码', '开盘指数', '收盘指数', '最高指数', '最低指数', '成交量', '成交额', '换手率', '涨跌幅']]
+            sw_day_1.columns=['date','code','open','close','high','low','vol','amount','up_count','down_count']
+            sw_day_1['date_stamp'] = int(round(datetime.datetime.now().timestamp()))
+        except Exception as e:
+            print(e)
+
+        return sw_day_1
+
+    return fetch_swindex_day_1(code, start_date, end_date)
+
+def QA_fetch_get_swindex_day_2(code, start_date, end_date):
+    """ 获取申万三级行业历史行情
+    """
+    def fetch_from_url(symbol: str = "801012"):
+        url = "https://www.swsresearch.com/institute_sw/allIndex/releasedIndex/releasedetail"
+        p = {"swindexcode": symbol, "period": "DAY"}
+        r = requests.get(url, params=p)
+        print(r)
+        #TODO: 解析抓取的数据
+
+    def fetch_swindex_day_2(code, start_date, end_date):
+        sw_day_2 = None
+        try:
+            sw_day_2 = fetch_swindex_day_2(code)
+            sw_day_2['发布日期'] = sw_day_2['发布日期'].apply(lambda x: x.strftime('%Y-%m-%d'))
+            sw_day_2 = sw_day_2.loc[(sw_day_2['发布日期'] >= start_date) & (sw_day_2['发布日期'] <= end_date),['发布日期', '指数代码', '开盘指数', '收盘指数', '最高指数', '最低指数', '成交量', '成交额', '换手率', '涨跌幅']]
+            sw_day_2.columns=['date','code','open','close','high','low','vol','amount','up_count','down_count']
+            sw_day_2['date_stamp'] = int(round(datetime.datetime.now().timestamp()))
+        except Exception as e:
+            print(e)
+
+        return sw_day_2
+
+    return fetch_swindex_day_2(code, start_date, end_date)
 
 def QA_fetch_get_swindex_list():
     """获取申万指数列表
@@ -66,4 +111,6 @@ def QA_fetch_get_swindex_list():
     return fetch_swindex_list()
 
 if __name__ == '__main__':
-    print(QA_fetch_get_swindex_list())
+    # print(QA_fetch_get_swindex_list())
+    #print(QA_fetch_get_swindex_day_1('801010', '2023-01-01', '2023-06-01'))
+    print(QA_fetch_get_swindex_day_1('801981', '2023-01-01', '2023-06-01'))
