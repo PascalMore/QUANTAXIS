@@ -109,6 +109,18 @@ def QA_SU_save_swindex_list(engine, client=DATABASE):
     engine = select_save_engine(engine)
     engine.QA_SU_save_swindex_list(client=client)
 
+def QA_SU_save_swindex_day_1(engine, client=DATABASE):
+    """save index_list
+
+    Arguments:
+        engine {[type]} -- [description]
+
+    Keyword Arguments:
+        client {[type]} -- [description] (default: {DATABASE})
+    """
+
+    engine = select_save_engine(engine)
+    engine.QA_SU_save_swindex_day_1(client=client)
 
 def QA_SU_save_extension_index_list(engine, client=DATABASE):
     """save index_list
