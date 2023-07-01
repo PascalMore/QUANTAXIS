@@ -25,7 +25,7 @@
 # SOFTWARE.
 
 import datetime
-from QUANTAXIS.QASU.main import (QA_SU_save_etf_list, QA_SU_save_etf_day, QA_SU_save_index_list, QA_SU_save_index_day, QA_SU_save_extension_index_list, QA_SU_save_swindex_list, QA_SU_save_extension_index_day, QA_SU_save_stock_min,
+from QUANTAXIS.QASU.main import (QA_SU_save_etf_list, QA_SU_save_etf_day, QA_SU_save_index_list, QA_SU_save_index_day, QA_SU_save_extension_index_list, QA_SU_save_swindex_list, QA_SU_save_swindex_day_1, QA_SU_save_extension_index_day, QA_SU_save_stock_min,
                        QA_SU_save_stock_block, QA_SU_save_stock_day,QA_SU_save_stock_day_extend,QA_SU_save_etf_min,
                        QA_SU_save_stock_list, QA_SU_save_stock_xdxr)
 
@@ -44,8 +44,9 @@ else:
     QA_SU_save_index_list('tdx')
     # 新增扩展指数列表
     QA_SU_save_extension_index_list('tdx')
-    # 新增申万行业指数
+    # 新增申万行业指数以及成份股
     QA_SU_save_swindex_list('ak')
+    QA_SU_save_swindex_component('ak')
 
     #2. 更新每日的股票行情（日、分红除权、分钟）
     QA_SU_save_stock_day('tdx')
@@ -55,6 +56,7 @@ else:
     QA_SU_save_etf_day('tdx')
     QA_SU_save_index_day('tdx')
     QA_SU_save_extension_index_day('tdx')
+    QA_SU_save_swindex_day_1('ak')
     
     #5. 更新币安数字货币所数据
     #QA_SU_save_binance_symbol()

@@ -39,6 +39,9 @@ def QA_fetch_get_swindex_day_1(code, start_date, end_date):
             sw_day_1['发布日期'] = sw_day_1['发布日期'].apply(lambda x: x.strftime('%Y-%m-%d'))
             sw_day_1 = sw_day_1.loc[(sw_day_1['发布日期'] >= start_date) & (sw_day_1['发布日期'] <= end_date),['发布日期', '指数代码', '开盘指数', '收盘指数', '最高指数', '最低指数', '成交量', '成交额', '换手率', '涨跌幅']]
             sw_day_1.columns=['date','code','open','close','high','low','vol','amount','up_count','down_count']
+            #将vol和amount的单位亿换算成元
+            sw_day_1['vol'] = sw_day_1['vol'] * 100000000
+            sw_day_1['amount'] = sw_day_1['amount'] * 100000000
             sw_day_1['date_stamp'] = int(round(datetime.datetime.now().timestamp()))
         except Exception as e:
             print(e)
@@ -48,22 +51,20 @@ def QA_fetch_get_swindex_day_1(code, start_date, end_date):
     return fetch_swindex_day_1(code, start_date, end_date)
 
 def QA_fetch_get_swindex_day_2(code, start_date, end_date):
-    """ 获取申万三级行业历史行情
+    """ 获取申万一级/二级/三级行业历史行情
     """
-    def fetch_from_url(symbol: str = "801012"):
-        url = "https://www.swsresearch.com/institute_sw/allIndex/releasedIndex/releasedetail"
-        p = {"swindexcode": symbol, "period": "DAY"}
-        r = requests.get(url, params=p)
-        print(r)
-        #TODO: 解析抓取的数据
-
     def fetch_swindex_day_2(code, start_date, end_date):
         sw_day_2 = None
         try:
-            sw_day_2 = fetch_swindex_day_2(code)
-            sw_day_2['发布日期'] = sw_day_2['发布日期'].apply(lambda x: x.strftime('%Y-%m-%d'))
-            sw_day_2 = sw_day_2.loc[(sw_day_2['发布日期'] >= start_date) & (sw_day_2['发布日期'] <= end_date),['发布日期', '指数代码', '开盘指数', '收盘指数', '最高指数', '最低指数', '成交量', '成交额', '换手率', '涨跌幅']]
+            sw_day_2 = ak.index_hist_sw(code)
+            sw_day_2['日期'] = sw_day_2['日期'].apply(lambda x: x.strftime('%Y-%m-%d'))
+            sw_day_2 = sw_day_2.loc[(sw_day_2['日期'] >= start_date) & (sw_day_2['日期'] <= end_date),['日期', '代码', '开盘', '收盘', '最高', '最低', '成交量', '成交额']]
+            sw_day_2['up_count'] = ''
+            sw_day_2['down_count'] = ''
             sw_day_2.columns=['date','code','open','close','high','low','vol','amount','up_count','down_count']
+             #将vol和amount的单位亿换算成元
+            sw_day_2['vol'] = sw_day_2['vol'] * 100000000
+            sw_day_2['amount'] = sw_day_2['amount'] * 100000000
             sw_day_2['date_stamp'] = int(round(datetime.datetime.now().timestamp()))
         except Exception as e:
             print(e)
@@ -110,7 +111,30 @@ def QA_fetch_get_swindex_list():
 
     return fetch_swindex_list()
 
+def QA_fetch_get_swindex_component(code):
+    """获取申万指数成份股
+    """
+    def fetch_swindex_component(code):
+        sw_com = None
+        try:
+            sw_com = ak.index_component_sw(code)
+            sw_com['code'] = code
+            sw_com['date'] = str(datetime.date.today().strftime("%Y-%m-%d"))
+            sw_com = sw_com.loc[:,['code', 'date', '证券代码','证券名称','最新权重','计入日期']]
+            sw_com['计入日期' ]= sw_com['计入日期'].apply(lambda x: x.strftime('%Y-%m-%d'))
+            sw_com.rename(columns={'证券代码': 'sec_code', '证券名称': 'sec_name', '最新权重': 'latest_weight', '计入日期': 'include_date'}, inplace=True)
+
+        except Exception as e:
+            print(e)
+
+        return sw_com
+
+    return fetch_swindex_component(code)
+
+
 if __name__ == '__main__':
     # print(QA_fetch_get_swindex_list())
     #print(QA_fetch_get_swindex_day_1('801010', '2023-01-01', '2023-06-01'))
-    print(QA_fetch_get_swindex_day_1('801981', '2023-01-01', '2023-06-01'))
+    #print(QA_fetch_get_swindex_day_2('801012', '2023-01-01', '2023-06-01'))
+    #print(ak.index_hist_sw('850351'))
+    print(QA_fetch_get_swindex_component('857421'))
