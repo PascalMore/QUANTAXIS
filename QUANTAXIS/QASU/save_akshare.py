@@ -37,7 +37,7 @@ from QUANTAXIS.QAUtil import (
 )
 
 from QUANTAXIS.QAUtil.QASetting import DATABASE
-from QUANTAXIS.QAFetch.QAAkshare import QA_fetch_get_swindex_list, QA_fetch_get_swindex_day_1
+from QUANTAXIS.QAFetch.QAAkshare import QA_fetch_get_swindex_list, QA_fetch_get_swindex_day_1, QA_fetch_get_swindex_day_2,QA_fetch_get_swindex_component
 
 
 def QA_SU_save_swindex_list(client=DATABASE, ui_log=None, ui_progress=None):
@@ -53,6 +53,69 @@ def QA_SU_save_swindex_list(client=DATABASE, ui_log=None, ui_progress=None):
     except Exception as e:
         print(e)
 
+def QA_SU_save_swindex_component(client=DATABASE, ui_log=None, ui_progress=None):
+    '''
+    save swindex component
+    保存申万行业成份股
+    :param client:
+    :param ui_log:  给GUI qt 界面使用
+    :param ui_progress: 给GUI qt 界面使用
+    :param ui_progress_int_value: 给GUI qt 界面使用
+    '''
+    __index_list = QA_fetch_get_swindex_list()
+    coll = client['index_component']
+    coll.create_index(
+        [('code',
+          pymongo.ASCENDING),
+         ('date',
+          pymongo.ASCENDING)]
+    )
+    err = []
+
+    def __saving_work(code, coll):
+
+        try:
+            QA_util_log_info(
+                '##JOB23 Now Saving SW INDEX COMPONENT==== \n Trying updating {} of {}'
+                    .format(code,
+                            str(datetime.date.today().strftime("%Y-%m-%d"))),
+                ui_log=ui_log
+            )
+            coll.insert_many(
+                QA_util_to_json_from_pandas(
+                    QA_fetch_get_swindex_component(str(code))
+                )
+            )
+        except Exception as e:
+            QA_util_log_info(e, ui_log=ui_log)
+            err.append(str(code))
+            QA_util_log_info(err, ui_log=ui_log)
+
+    for i_ in range(len(__index_list)):
+        # __saving_work('000001')
+        QA_util_log_info(
+            'The {} of Total {}'.format(i_,
+                                        len(__index_list)),
+            ui_log=ui_log
+        )
+
+        strLogProgress = 'DOWNLOAD PROGRESS {} '.format(
+            str(float(i_ / len(__index_list) * 100))[0:4] + '%'
+        )
+        intLogProgress = int(float(i_ / len(__index_list) * 10000.0))
+        QA_util_log_info(
+            strLogProgress,
+            ui_log=ui_log,
+            ui_progress=ui_progress,
+            ui_progress_int_value=intLogProgress
+        )
+        __saving_work(__index_list.index[i_][0], coll)
+    if len(err) < 1:
+        QA_util_log_info('SUCCESS', ui_log=ui_log)
+    else:
+        QA_util_log_info(' ERROR CODE \n ', ui_log=ui_log)
+        QA_util_log_info(err, ui_log=ui_log)
+
 def QA_SU_save_swindex_day_1(client=DATABASE, ui_log=None, ui_progress=None):
     '''
     save swindex_day_1
@@ -62,9 +125,9 @@ def QA_SU_save_swindex_day_1(client=DATABASE, ui_log=None, ui_progress=None):
     :param ui_progress: 给GUI qt 界面使用
     :param ui_progress_int_value: 给GUI qt 界面使用
     '''
-    # 筛选出sw L1的index,L2和L3的不在这个功能实现
     __index_list = QA_fetch_get_swindex_list()
-    __index_list = __index_list.loc[__index_list['decimal_point'] <= 2]
+    #2023/06/29更新，使用QA_fetch_get_swindex_day_2可以获取申万三级行情，因此不需要再筛选了
+    #__index_list = __index_list.loc[__index_list['decimal_point'] <= 2]
     coll = client.index_day
     coll.create_index(
         [('code',
@@ -83,7 +146,7 @@ def QA_SU_save_swindex_day_1(client=DATABASE, ui_log=None, ui_progress=None):
                 start_time = ref_[ref_.count() - 1]['date']
 
                 QA_util_log_info(
-                    '##JOB22 Now Saving SW L1 INDEX_DAY==== \n Trying updating {} from {} to {}'
+                    '##JOB22 Now Saving SW L1&L2&L3 INDEX_DAY==== \n Trying updating {} from {} to {}'
                         .format(code,
                                 start_time,
                                 end_time),
@@ -93,7 +156,7 @@ def QA_SU_save_swindex_day_1(client=DATABASE, ui_log=None, ui_progress=None):
                 if start_time != end_time:
                     coll.insert_many(
                         QA_util_to_json_from_pandas(
-                            QA_fetch_get_swindex_day_1(
+                            QA_fetch_get_swindex_day_2(
                                 str(code),
                                 QA_util_get_next_day(start_time),
                                 end_time
@@ -104,7 +167,7 @@ def QA_SU_save_swindex_day_1(client=DATABASE, ui_log=None, ui_progress=None):
                 try:
                     start_time = '1990-01-01'
                     QA_util_log_info(
-                        '##JOB22 Now Saving SW L1 INDEX_DAY==== \n Trying updating {} from {} to {}'
+                        '##JOB22 Now Saving SW L1&L2&L3 INDEX_DAY==== \n Trying updating {} from {} to {}'
                             .format(code,
                                     start_time,
                                     end_time),
@@ -112,7 +175,7 @@ def QA_SU_save_swindex_day_1(client=DATABASE, ui_log=None, ui_progress=None):
                     )
                     coll.insert_many(
                         QA_util_to_json_from_pandas(
-                            QA_fetch_get_swindex_day_1(
+                            QA_fetch_get_swindex_day_2(
                                 str(code),
                                 start_time,
                                 end_time
@@ -122,7 +185,7 @@ def QA_SU_save_swindex_day_1(client=DATABASE, ui_log=None, ui_progress=None):
                 except:
                     start_time = '2009-01-01'
                     QA_util_log_info(
-                        '##JOB22 Now Saving SW L1 INDEX_DAY==== \n Trying updating {} from {} to {}'
+                        '##JOB22 Now Saving SW L1&L2&L3 INDEX_DAY==== \n Trying updating {} from {} to {}'
                             .format(code,
                                     start_time,
                                     end_time),
@@ -130,7 +193,7 @@ def QA_SU_save_swindex_day_1(client=DATABASE, ui_log=None, ui_progress=None):
                     )
                     coll.insert_many(
                         QA_util_to_json_from_pandas(
-                            QA_fetch_get_swindex_day_1(
+                            QA_fetch_get_swindex_day_2(
                                 str(code),
                                 start_time,
                                 end_time
@@ -172,4 +235,4 @@ if __name__ == '__main__':
     # client = MongoClient('localhost', 27017)
     # db = client['quantaxis']
     # QA_SU_save_swindex_list(client=db)
-    QA_SU_save_swindex_day_1()
+    QA_SU_save_swindex_component()
