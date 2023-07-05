@@ -119,7 +119,7 @@ def QA_SU_save_swindex_component(client=DATABASE, ui_log=None, ui_progress=None)
 def QA_SU_save_swindex_day_1(client=DATABASE, ui_log=None, ui_progress=None):
     '''
     save swindex_day_1
-    保存申万一级及二级行业历史行情数据
+    保存申万一级、二级、三级行业历史行情数据
     :param client:
     :param ui_log:  给GUI qt 界面使用
     :param ui_progress: 给GUI qt 界面使用
@@ -235,4 +235,5 @@ if __name__ == '__main__':
     # client = MongoClient('localhost', 27017)
     # db = client['quantaxis']
     # QA_SU_save_swindex_list(client=db)
-    QA_SU_save_swindex_component()
+    # QA_SU_save_swindex_component()
+    QA_SU_save_swindex_day_1()
