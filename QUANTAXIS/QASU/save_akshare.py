@@ -234,6 +234,6 @@ if __name__ == '__main__':
     # from pymongo import MongoClient
     # client = MongoClient('localhost', 27017)
     # db = client['quantaxis']
-    # QA_SU_save_swindex_list(client=db)
-    # QA_SU_save_swindex_component()
-    QA_SU_save_swindex_day_1()
+    #QA_SU_save_swindex_list()
+    QA_SU_save_swindex_component()
+    #QA_SU_save_swindex_day_1()

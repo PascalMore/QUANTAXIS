@@ -69,7 +69,8 @@ def QA_fetch_get_swindex_day_2(code, start_date, end_date):
             sw_day_2['amount'] = sw_day_2['amount'] * 100000000
             #2023/7/4更新， date_stamp精确到日,不需要到时分秒
             # sw_day_2['date_stamp'] = int(round(datetime.datetime.now().timestamp()))
-            sw_day_2['date_stamp'] = int(time.mktime(time.strptime( datetime.date.today().strftime("%Y-%m-%d"), '%Y-%m-%d')))
+            # sw_day_2['date_stamp'] =int(time.mktime(time.strptime( datetime.date.today().strftime('%Y-%m-%d')), '%Y-%m-%d'))
+            sw_day_2['date_stamp'] = sw_day_2['date'].apply(lambda x: int(time.mktime(time.strptime( x, '%Y-%m-%d'))))
         except Exception as e:
             print(e)
 
@@ -137,8 +138,8 @@ def QA_fetch_get_swindex_component(code):
 
 
 if __name__ == '__main__':
-    print(QA_fetch_get_swindex_list())
+    #print(QA_fetch_get_swindex_list())
     #print(QA_fetch_get_swindex_day_1('801010', '2023-01-01', '2023-06-01'))
     #print(QA_fetch_get_swindex_day_2('801012', '2023-01-01', '2023-06-01'))
     #print(ak.index_hist_sw('850351'))
-    # print(QA_fetch_get_swindex_component('857421'))
+    print(QA_fetch_get_swindex_component('801770'))
