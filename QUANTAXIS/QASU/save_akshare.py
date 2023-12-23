@@ -51,7 +51,8 @@ def QA_SU_save_swindex_list(client=DATABASE, ui_log=None, ui_progress=None):
             ordered=False
         )
     except Exception as e:
-        print(e)
+        #2023/12/23 fix： 忽略重复主键引起的异常日志
+        pass
 
 def QA_SU_save_swindex_component(client=DATABASE, ui_log=None, ui_progress=None):
     '''
@@ -234,6 +235,6 @@ if __name__ == '__main__':
     # from pymongo import MongoClient
     # client = MongoClient('localhost', 27017)
     # db = client['quantaxis']
-    #QA_SU_save_swindex_list()
-    QA_SU_save_swindex_component()
+    QA_SU_save_swindex_list()
+    #QA_SU_save_swindex_component()
     #QA_SU_save_swindex_day_1()
