@@ -26,6 +26,7 @@
 
 import datetime
 import multiprocessing
+import sys
 from QUANTAXIS.QASU.main import (QA_SU_save_etf_list, QA_SU_save_etf_day, QA_SU_save_index_list, QA_SU_save_index_day, QA_SU_save_extension_index_list, QA_SU_save_swindex_list, QA_SU_save_swindex_day_1, QA_SU_save_swindex_component, QA_SU_save_extension_index_day, QA_SU_save_stock_min,
                        QA_SU_save_stock_block, QA_SU_save_stock_day,QA_SU_save_stock_day_extend,QA_SU_save_etf_min,
                        QA_SU_save_stock_list, QA_SU_save_stock_xdxr)
@@ -105,7 +106,7 @@ def process(l):
 data_list = [
     'stock_day',
     'stock_xdxr',
-    'stock_day_extend',
+    #'stock_day_extend',
     'etf_day',
     'index_day',
     'extension_index_day',
@@ -139,5 +140,4 @@ def main():
         pool.join()
 
 if __name__ == '__main__':
-    #sys.stdout = Logger()
     main()
