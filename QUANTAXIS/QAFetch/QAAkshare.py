@@ -139,7 +139,8 @@ def QA_fetch_get_swindex_component(code):
 
 if __name__ == '__main__':
     #print(QA_fetch_get_swindex_list())
-    #print(QA_fetch_get_swindex_day_1('801010', '2023-01-01', '2023-06-01'))
-    #print(QA_fetch_get_swindex_day_2('801012', '2023-01-01', '2023-06-01'))
+    ak.sw_index_first_info()
+    #print(QA_fetch_get_swindex_day_1('801010', '2023-06-30', '2023-07-20'))
+    #print(QA_fetch_get_swindex_day_2('850122', '2023-07-17', '2023-07-22'))
     #print(ak.index_hist_sw('850351'))
-    print(QA_fetch_get_swindex_component('801770'))
+    #print(QA_fetch_get_swindex_component('801770'))
