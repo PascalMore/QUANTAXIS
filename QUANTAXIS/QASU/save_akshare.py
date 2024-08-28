@@ -308,7 +308,7 @@ def QA_SU_save_stock_day_extend(client=DATABASE, ui_log=None, ui_progress=None):
             print(e)
             err.append(str(code))
 
-    stock_list = QA_fetch_get_stock_list()
+    stock_list = QA_fetch_get_stock_list().code.unique().tolist()
     #stock_list= list(["000001"])
     coll_stock_day_extend = client.stock_day_extend
     coll_stock_day_extend.create_index(
