@@ -46,7 +46,7 @@ def process(l):
     elif l == 'stock_xdxr':
         QA_SU_save_stock_xdxr('tdx')
     elif l == 'stock_day_extend':
-        QA_SU_save_stock_day_extend('ts')
+        QA_SU_save_stock_day_extend('ak')
     elif l == 'etf_day':
         QA_SU_save_etf_day('tdx')
     elif l == 'index_day':

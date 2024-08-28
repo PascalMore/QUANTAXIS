@@ -28,6 +28,10 @@ import time
 import datetime
 import akshare as ak
 import requests
+from QUANTAXIS.QAUtil import (
+    QA_util_log_info,
+    QA_util_to_json_from_pandas
+)
 
 def QA_fetch_get_swindex_day_1(code, start_date, end_date):
     """获取申万一级及二级行业历史行情
@@ -136,11 +140,66 @@ def QA_fetch_get_swindex_component(code):
 
     return fetch_swindex_component(code)
 
+def QA_fetch_get_daily_extend(name='', start='', end='', td= '', type_='pd'):
+    def fetch_val_data():
+        data = None
+        try:
+            time.sleep(0.3)
+            data = ak.stock_a_indicator_lg(symbol=str(name))
+            print('fetch stock daily extend value done: ' + str(name))
+        except Exception as e:
+            print(e)
+            print('except when fetch daily value data of ' + str(name))
+            time.sleep(1)
+            data = fetch_val_data()
+        return data
+    
+    def fetch_quote_data(symbol, start_date, end_date):
+        data = None
+        try:
+            time.sleep(0.3)
+            data = ak.stock_zh_a_hist(symbol=str(symbol), period="daily", start_date=start_date, end_date=end_date)
+            print('fetch stock daily extend turnover done: ' + str(name))
+        except Exception as e:
+            print(e)
+            print('except when fetch quota data of ' + str(name))
+            time.sleep(1)
+            data = fetch_quote_data(symbol, start_date, end_date)
+        return data
+
+    data = fetch_val_data()
+    data_turn = fetch_quote_data(name, start.replace("-",""), end.replace("-",""))
+    #注意单位是万股
+    data_turn["float_share"] = data_turn["成交量"] / data_turn["换手率"]
+    data_turn.rename(columns={'日期': 'trade_date','换手率': 'turnover_rate'}, inplace=True)
+    #print(data_turn)
+    #拼接数据
+    data = pd.merge(data, data_turn[["trade_date", "float_share", "turnover_rate"]], how="outer",on="trade_date")
+    #print(data)
+    data.rename(columns={'trade_date': 'date'}, inplace=True)
+    data['date'] = data['date'].apply(lambda x: x.strftime("%Y-%m-%d"))
+    data['date_stamp'] = data['date'].apply( lambda x: time.mktime(time.strptime(x, '%Y-%m-%d')) )
+    data['code'] =  str(name)
+    #过滤开始和结束时间内的数据
+    data = data.loc[(data['date'] >= start)
+                     & (data['date'] <= end)]
+    if type_ in ['json']:
+        data_json = QA_util_to_json_from_pandas(data)
+        return data_json
+    elif type_ in ['pd', 'pandas', 'p']:
+        data = data.set_index('date', drop=False)
+        return data
+
+def QA_fetch_get_stock_list():
+    stk_list = ak.stock_info_a_code_name()
+    return stk_list
 
 if __name__ == '__main__':
     #print(QA_fetch_get_swindex_list())
-    ak.sw_index_first_info()
+    #ak.sw_index_first_info()
     #print(QA_fetch_get_swindex_day_1('801010', '2023-06-30', '2023-07-20'))
     #print(QA_fetch_get_swindex_day_2('850122', '2023-07-17', '2023-07-22'))
     #print(ak.index_hist_sw('850351'))
     #print(QA_fetch_get_swindex_component('801770'))
+    print(QA_fetch_get_daily_extend("000001", "2024-02-19", "2024-02-20", "", "pd"))
+    #print(QA_fetch_get_stock_list())
