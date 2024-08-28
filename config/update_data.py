@@ -47,7 +47,7 @@ def process(l):
     elif l == 'stock_xdxr':
         QA_SU_save_stock_xdxr('tdx')
     elif l == 'stock_day_extend':
-        QA_SU_save_stock_day_extend('ts')
+        QA_SU_save_stock_day_extend('ak')
     elif l == 'etf_day':
         QA_SU_save_etf_day('tdx')
     elif l == 'index_day':
@@ -106,7 +106,7 @@ def process(l):
 data_list = [
     'stock_day',
     'stock_xdxr',
-    #'stock_day_extend',
+    'stock_day_extend',
     'etf_day',
     'index_day',
     'extension_index_day',
