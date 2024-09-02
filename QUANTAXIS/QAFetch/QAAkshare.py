@@ -202,4 +202,5 @@ if __name__ == '__main__':
     #print(ak.index_hist_sw('850351'))
     #print(QA_fetch_get_swindex_component('801770'))
     print(QA_fetch_get_daily_extend("000001", "2024-02-19", "2024-02-20", "", "pd"))
+    #print(ak.stock_profit_forecast_em())
     #print(QA_fetch_get_stock_list())
