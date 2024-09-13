@@ -160,7 +160,9 @@ class QA_DataStruct_Stock_day(_quotation_base):
                     ).set_index(['date',
                                  'code'])
                     data = self.data.join(adj)
-                    data['adj'].fillna(method='ffill', inplace=True)
+                    #data['adj'].fillna(method='ffill', inplace=True)
+                    #2024/9/12 fix future warnning
+                    data['adj'] = data['adj'].ffill()
 
                     for col in ['open', 'high', 'low', 'close']:
                         data[col] = data[col] * data['adj']
