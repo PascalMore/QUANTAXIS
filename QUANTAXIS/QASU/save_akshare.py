@@ -46,13 +46,28 @@ def QA_SU_save_swindex_list(client=DATABASE, ui_log=None, ui_progress=None):
     coll_index_list.create_index("code", unique=True)
 
     try:
-        coll_index_list.insert_many(
-            QA_util_to_json_from_pandas(index_list),
-            ordered=False
+        #2025/03/19更新：对于指数清单，不是全删全插（因为还有扩展指数列表），所以需要批量upsert，以code+sse作为主键
+        bulk_reqs = []
+        for ix, r in index_list.iterrows():
+            item_dict = r.to_dict()
+            bulk_reqs.append(
+                pymongo.UpdateOne(
+                    {'code': item_dict['code'], 'sse':item_dict['sse']},
+                    {"$set": item_dict},
+                    upsert=True
+                )
+            )
+        up_res = coll_index_list.bulk_write(bulk_reqs, ordered=False)
+        print("save_swindex_list bulk upsert result: {}".format(up_res.bulk_api_result))
+        QA_util_log_info(
+            "完成申万行业指数列表获取",
+            ui_log=ui_log,
+            ui_progress=ui_progress,
+            ui_progress_int_value=10000
         )
     except Exception as e:
-        #2023/12/23 fix： 忽略重复主键引起的异常日志
-        pass
+        QA_util_log_info(e, ui_log=ui_log)
+        print(" Error save_akshare.QA_SU_save_swindex_list exception!")
 
 def QA_SU_save_swindex_component(client=DATABASE, ui_log=None, ui_progress=None):
     '''
