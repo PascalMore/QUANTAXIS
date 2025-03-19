@@ -42,6 +42,7 @@ from QUANTAXIS.QAFetch import QAfinancial
 from QUANTAXIS.QAFetch.base import get_stock_market
 from QUANTAXIS.QAFetch import QAQAWEB as QAWEB
 from QUANTAXIS.QAFetch import QAKQ as QAKQ
+from QUANTAXIS.QAFetch import QAAkshare as QAAkshare
 
 
 def use(package):
@@ -56,6 +57,8 @@ def use(package):
         return QAHexun
     elif package in ['QA']:
         return QAWEB
+    elif package in ['akshare']:
+        return QAAkshare
 
 
 def QA_fetch_get_stock_day(package, code, start, end, if_fq='00', level='day', type_='pd'):
@@ -164,7 +167,7 @@ def QA_fetch_get_bond_realtime(package, code):
 
 def QA_fetch_get_stock_block(package):
     Engine = use(package)
-    if package in ['tdx', 'pytdx', 'ths', 'tushare', 'QA']:
+    if package in ['tdx', 'pytdx', 'ths', 'tushare', 'QA', 'akshare']:
         return Engine.QA_fetch_get_stock_block()
     else:
         return 'Unsupport packages'

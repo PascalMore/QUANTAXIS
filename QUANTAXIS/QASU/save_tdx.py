@@ -2050,21 +2050,25 @@ def QA_SU_save_stock_block(client=DATABASE, ui_log=None, ui_progress=None):
         # )
 
         # tushare 的板块数据有中证500成分，增加获取中证500成分 ——阿财
+        # coll.insert_many(
+        #     QA_util_to_json_from_pandas(QA_fetch_get_stock_block('tushare'))
+        # )
+        # QA_util_log_info(
+        #     'tushare Block ====',
+        #     ui_log=ui_log,
+        #     ui_progress=ui_progress,
+        #     ui_progress_int_value=9000
+        # )
+
+        #2025/03/19 fix：akshare 的板块数据有中证500成分，增加获取中证500成分
         coll.insert_many(
-            QA_util_to_json_from_pandas(QA_fetch_get_stock_block('tushare'))
+            QA_util_to_json_from_pandas(QA_fetch_get_stock_block('akshare'))
         )
         QA_util_log_info(
-            'tushare Block ====',
+            'akshare Block ====',
             ui_log=ui_log,
             ui_progress=ui_progress,
             ui_progress_int_value=9000
-        )
-
-        QA_util_log_info(
-            '完成股票板块获取=',
-            ui_log=ui_log,
-            ui_progress=ui_progress,
-            ui_progress_int_value=10000
         )
 
         # coll.insert_many(

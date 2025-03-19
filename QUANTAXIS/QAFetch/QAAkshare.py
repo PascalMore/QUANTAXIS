@@ -194,6 +194,24 @@ def QA_fetch_get_stock_list():
     stk_list = ak.stock_info_a_code_name()
     return stk_list
 
+def QA_fetch_get_stock_block():
+    """Akshare的版块数据
+    
+    Returns:
+        [type] -- [description]
+    """
+    #补充获取板块数据：[中证500成分股]
+    zz500_cons = ak.index_stock_cons(symbol="000905")
+    try:
+        zz500_cons['blockname'] = '中证500'
+        zz500_cons['source'] = 'akshare'
+        zz500_cons['type'] = 'csindex'
+        zz500_cons = zz500_cons.drop(['品种名称', '纳入日期'], axis=1)
+        zz500_cons.rename(columns={'品种代码': 'code'}, inplace=True)
+        return zz500_cons.set_index('code', drop=False)
+    except:
+        return None
+        
 if __name__ == '__main__':
     #print(QA_fetch_get_swindex_list())
     #ak.sw_index_first_info()
@@ -201,6 +219,7 @@ if __name__ == '__main__':
     #print(QA_fetch_get_swindex_day_2('850122', '2023-07-17', '2023-07-22'))
     #print(ak.index_hist_sw('850351'))
     #print(QA_fetch_get_swindex_component('801770'))
-    print(QA_fetch_get_daily_extend("000001", "2024-02-19", "2024-02-20", "", "pd"))
+    #print(QA_fetch_get_daily_extend("000001", "2024-02-19", "2024-02-20", "", "pd"))
+    print(QA_fetch_get_stock_block())
     #print(ak.stock_profit_forecast_em())
     #print(QA_fetch_get_stock_list())
