@@ -5908,28 +5908,61 @@ def QA_SU_save_future_list(client=DATABASE, ui_log=None, ui_progress=None):
 def QA_SU_save_index_list(client=DATABASE, ui_log=None, ui_progress=None):
     index_list = QA_fetch_get_index_list()
     coll_index_list = client.index_list
-    coll_index_list.create_index("code", unique=True)
+    coll_index_list.create_index([("code", 1), ("sse", -1)], unique=True)
 
     try:
-        coll_index_list.insert_many(
-            QA_util_to_json_from_pandas(index_list),
-            ordered=False
+        #2025/03/19更新：对于指数清单，不是全删全插（因为还有扩展指数列表），所以需要批量upsert，以code+sse作为主键
+        bulk_reqs = []
+        for ix, r in index_list.iterrows():
+            item_dict = r.to_dict()
+            bulk_reqs.append(
+                pymongo.UpdateOne(
+                    {'code': item_dict['code'], 'sse':item_dict['sse']},
+                    {"$set": item_dict},
+                    upsert=True
+                )
+            )
+        up_res = coll_index_list.bulk_write(bulk_reqs, ordered=False)
+        print("save_index_list bulk upsert result: {}".format(up_res.bulk_api_result))
+
+        QA_util_log_info(
+            "完成指数列表获取",
+            ui_log=ui_log,
+            ui_progress=ui_progress,
+            ui_progress_int_value=10000
         )
-    except:
-        pass
+    except Exception as e:
+        QA_util_log_info(e, ui_log=ui_log)
+        print(" Error save_tdx.QA_SU_save_index_list exception!")
 
 def QA_SU_save_extension_index_list(client=DATABASE, ui_log=None, ui_progress=None):
     index_list = QA_fetch_get_extensionindex_list()
     coll_index_list = client.index_list
-    coll_index_list.create_index("code", unique=True)
+    coll_index_list.create_index([("code", 1), ("sse", -1)], unique=True)
 
     try:
-        coll_index_list.insert_many(
-            QA_util_to_json_from_pandas(index_list),
-            ordered=False
+        #2025/03/19更新：对于指数清单，不是全删全插（因为还有扩展指数列表），所以需要批量upsert，以code+sse作为主键
+        bulk_reqs = []
+        for ix, r in index_list.iterrows():
+            item_dict = r.to_dict()
+            bulk_reqs.append(
+                pymongo.UpdateOne(
+                    {'code': item_dict['code'], 'sse':item_dict['sse']},
+                    {"$set": item_dict},
+                    upsert=True
+                )
+            )
+        up_res = coll_index_list.bulk_write(bulk_reqs, ordered=False)
+        print("save_extension_index_list bulk upsert result: {}".format(up_res.bulk_api_result))
+        QA_util_log_info(
+            "完成扩展指数列表获取",
+            ui_log=ui_log,
+            ui_progress=ui_progress,
+            ui_progress_int_value=10000
         )
-    except:
-        pass
+    except Exception as e:
+        QA_util_log_info(e, ui_log=ui_log)
+        print(" Error save_tdx.QA_SU_save_extension_index_list exception!")
 
 def QA_SU_save_single_future_day(code : str, client=DATABASE, ui_log=None, ui_progress=None):
     '''
