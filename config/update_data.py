@@ -42,19 +42,33 @@ def err_call_back(err):
 
 def process(l):
     if l == 'stock_day':
+        print("开始stock_day的数据更新")
         QA_SU_save_stock_day('tdx')
+        print("完成stock_day的数据更新")
     elif l == 'stock_xdxr':
+        print("开始stock_xdxr的数据更新")
         QA_SU_save_stock_xdxr('tdx')
+        print("完成stock_xdxr的数据更新")
     elif l == 'stock_day_extend':
+        print("开始stock_day_extend的数据更新")
         QA_SU_save_stock_day_extend('ak')
+        print("完成stock_day_extend的数据更新")
     elif l == 'etf_day':
+        print("开始etf_day的数据更新")
         QA_SU_save_etf_day('tdx')
+        print("完成etf_day的数据更新")
     elif l == 'index_day':
+        print("开始index_day的数据更新")
         QA_SU_save_index_day('tdx')
+        print("完成index_day的数据更新")
     elif l == 'extension_index_day':
+        print("开始extension_index_day的数据更新")
         QA_SU_save_extension_index_day('tdx')
+        print("完成extension_index_day的数据更新")
     elif l == 'swindex_day_1':
+        print("开始swindex_day的数据更新")
         QA_SU_save_swindex_day_1('ak')
+        print("完成swindex_day的数据更新")
     else:
         return
 
@@ -121,15 +135,18 @@ def main():
         
     else:
         #1. 更新最新股票、板块、ETF、指数列表
-        QA_SU_save_stock_list('tdx')
-        QA_SU_save_stock_block('tdx')
-        QA_SU_save_etf_list('tdx')
-        QA_SU_save_index_list('tdx')
-        # 新增扩展指数列表
-        QA_SU_save_extension_index_list('tdx')
-        # 新增申万行业指数以及成份股
-        QA_SU_save_swindex_list('ak')
-        QA_SU_save_swindex_component('ak')
+        try:
+            QA_SU_save_stock_list('tdx')
+            QA_SU_save_stock_block('tdx')
+            QA_SU_save_etf_list('tdx')
+            QA_SU_save_index_list('tdx')
+            # 新增扩展指数列表
+            QA_SU_save_extension_index_list('tdx')
+            # 新增申万行业指数以及成份股
+            QA_SU_save_swindex_list('ak')
+            QA_SU_save_swindex_component('ak')
+        except Exception as e:
+            print("更新股票/板块/ETF/指数等清单出现异常：", e)
 
         pool = multiprocessing.Pool(2) # 两个进程执行
         for l in data_list:
