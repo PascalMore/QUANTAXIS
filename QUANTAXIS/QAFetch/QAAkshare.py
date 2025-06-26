@@ -141,6 +141,8 @@ def QA_fetch_get_swindex_component(code):
     return fetch_swindex_component(code)
 
 def QA_fetch_get_daily_extend(name='', start='', end='', td= '', type_='pd'):
+    max_try_cnt_val = 0
+    max_try_cnt_quota = 0
     def fetch_val_data():
         data = None
         try:
@@ -151,24 +153,37 @@ def QA_fetch_get_daily_extend(name='', start='', end='', td= '', type_='pd'):
             print(e)
             print('except when fetch daily value data of ' + str(name))
             time.sleep(1)
-            data = fetch_val_data()
+            #2025/06/26更新：设置最大重试次数为5次
+            nonlocal max_try_cnt_val
+            if max_try_cnt_val < 5:
+                max_try_cnt_val = max_try_cnt_val + 1
+                data = fetch_val_data()
+
         return data
     
     def fetch_quote_data(symbol, start_date, end_date):
         data = None
         try:
-            time.sleep(0.3)
+            #2025/6/26 东财对于stock_zh_a_hist增加了很强的反扒机制，如果出现“Remote end closed connection without response”就需要在打开东财网页https://quote.eastmoney.com/f1.html 滑块验证下
+            time.sleep(1)
             data = ak.stock_zh_a_hist(symbol=str(symbol), period="daily", start_date=start_date, end_date=end_date)
             print('fetch stock daily extend turnover done: ' + str(name))
         except Exception as e:
             print(e)
             print('except when fetch quota data of ' + str(name))
             time.sleep(1)
-            data = fetch_quote_data(symbol, start_date, end_date)
+            #2025/06/26更新：设置最大重试次数为5次
+            nonlocal max_try_cnt_quota
+            if max_try_cnt_quota < 5:
+                max_try_cnt_quota = max_try_cnt_quota + 1
+                data = fetch_quote_data(symbol, start_date, end_date)                
         return data
 
     data = fetch_val_data()
     data_turn = fetch_quote_data(name, start.replace("-",""), end.replace("-",""))
+    if data_turn is None:
+        #2025/06/26更新：如果异常没有数据，就直接返回None
+        return None
     #注意单位是万股
     data_turn["float_share"] = data_turn["成交量"] / data_turn["换手率"]
     data_turn.rename(columns={'日期': 'trade_date','换手率': 'turnover_rate'}, inplace=True)
@@ -219,7 +234,7 @@ if __name__ == '__main__':
     #print(QA_fetch_get_swindex_day_2('850122', '2023-07-17', '2023-07-22'))
     #print(ak.index_hist_sw('850351'))
     #print(QA_fetch_get_swindex_component('801770'))
-    print(QA_fetch_get_daily_extend("000001", "2024-12-31", "2025-03-20", "", "pd"))
+    print(QA_fetch_get_daily_extend("002941", "2025-04-23", "2025-06-26", "", "pd"))
     #print(QA_fetch_get_stock_block())
     #print(ak.stock_profit_forecast_em())
     #print(QA_fetch_get_stock_list())
