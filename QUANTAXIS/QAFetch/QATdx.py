@@ -1619,6 +1619,9 @@ def QA_fetch_get_extensionindex_list(ip=None, port=None):
     data['pre_close'] = ""
     data = data.loc[:,['code','volunit','decimal_point','name','pre_close','sse','sec']].set_index(
                 ['code','sse'], drop=False)
+    #2025/6/29更新：过滤将【数字+CN/HK/US】的代码去掉
+    is_flitered = data['code'].str.contains(pat="^[0-9]*CN$|^[0-9]*HK$|^[0-9]*US$")
+    data = data[~is_flitered]
 
     return data
 
@@ -2549,7 +2552,8 @@ def QA_fetch_get_future_day(code, start_date, end_date, frequence='day',
 
         except Exception as exp:
             print("code is ", code)
-            print(exp.__str__)
+            #2025/6/29 修复打印异常出现的[method-wrapper __str__ xxx]的问题
+            print(exp)
             return None
 
         return data.drop(
@@ -2803,8 +2807,11 @@ if __name__ == '__main__':
     # print(QA_fetch_get_stock_transaction('000001', '2017-07-03', '2017-07-10'))
 
     # print(QA_fetch_get_stock_info('600116'))
+    #print(QA_fetch_get_stock_block())
+    #print(QA_fetch_get_extensionindex_day("C_NQHK", "2025-06-27", "2025-06-27"))
+    print(QA_fetch_get_extensionindex_list())
     # 【2022/06/11 fix】： 如果出现ip服务器错误，就运行下面的select_best_ip
     # best_ip = select_best_ip()
     # print(best_ip)
-    rows = QA_fetch_get_stock_list('index')
-    print(rows)
+    #rows = QA_fetch_get_stock_list('index')
+    #print(rows)
