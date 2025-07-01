@@ -317,65 +317,80 @@ def QA_fetch_get_stock_day(code, start_date, end_date, if_fq='00',
     Exception:
         如果出现网络问题/服务器拒绝, 会出现socket:time out 尝试再次获取/更换ip即可, 本函数不做处理
     """
-    ip, port = get_mainmarket_ip(ip, port)
-    api = TdxHq_API()
-    try:
-        with api.connect(ip, port, time_out=0.7):
+    max_retry_cnt = 0
 
-            if frequence in ['day', 'd', 'D', 'DAY', 'Day']:
-                frequence = 9
-            elif frequence in ['w', 'W', 'Week', 'week']:
-                frequence = 5
-            elif frequence in ['month', 'M', 'm', 'Month']:
-                frequence = 6
-            elif frequence in ['quarter', 'Q', 'Quarter', 'q']:
-                frequence = 10
-            elif frequence in ['y', 'Y', 'year', 'Year']:
-                frequence = 11
-            start_date = str(start_date)[0:10]
-            today_ = datetime.date.today()
-            lens = QA_util_get_trade_gap(start_date, today_)
+    def __fetch_stock_day(code, start_date, end_date, if_fq='00', frequence='day', ip=None, port=None):
+        ip, port = get_mainmarket_ip(ip, port)
+        api = TdxHq_API()
+        try:
+            with api.connect(ip, port, time_out=0.7):
 
-            data = pd.concat([api.to_df(
-                api.get_security_bars(frequence, _select_market_code(
-                    code), code, (int(lens / 800) - i) * 800, 800)) for i in
-                range(int(lens / 800) + 1)], axis=0, sort=False)
+                if frequence in ['day', 'd', 'D', 'DAY', 'Day']:
+                    frequence = 9
+                elif frequence in ['w', 'W', 'Week', 'week']:
+                    frequence = 5
+                elif frequence in ['month', 'M', 'm', 'Month']:
+                    frequence = 6
+                elif frequence in ['quarter', 'Q', 'Quarter', 'q']:
+                    frequence = 10
+                elif frequence in ['y', 'Y', 'year', 'Year']:
+                    frequence = 11
+                start_date = str(start_date)[0:10]
+                today_ = datetime.date.today()
+                lens = QA_util_get_trade_gap(start_date, today_)
 
-            # 这里的问题是: 如果只取了一天的股票,而当天停牌, 那么就直接返回None了
-            if len(data) < 1:
-                return None
-            data = data[data['open'] != 0]
+                data = pd.concat([api.to_df(
+                    api.get_security_bars(frequence, _select_market_code(
+                        code), code, (int(lens / 800) - i) * 800, 800)) for i in
+                    range(int(lens / 800) + 1)], axis=0, sort=False)
 
-            data = data.assign(
-                date=data['datetime'].apply(lambda x: str(x[0:10])),
-                code=str(code),
-                date_stamp=data['datetime'].apply(
-                    lambda x: QA_util_date_stamp(str(x)[0:10]))) \
-                .set_index('date', drop=False, inplace=False)
+                # 这里的问题是: 如果只取了一天的股票,而当天停牌, 那么就直接返回None了
+                if len(data) < 1:
+                    return None
+                data = data[data['open'] != 0]
 
-            end_date = str(end_date)[0:10]
-            data = data.drop(
-                ['year', 'month', 'day', 'hour', 'minute', 'datetime'],
-                axis=1)[
-                start_date:end_date]
-            if if_fq in ['00', 'bfq']:
-                return data
+                data = data.assign(
+                    date=data['datetime'].apply(lambda x: str(x[0:10])),
+                    code=str(code),
+                    date_stamp=data['datetime'].apply(
+                        lambda x: QA_util_date_stamp(str(x)[0:10]))) \
+                    .set_index('date', drop=False, inplace=False)
+
+                end_date = str(end_date)[0:10]
+                data = data.drop(
+                    ['year', 'month', 'day', 'hour', 'minute', 'datetime'],
+                    axis=1)[
+                    start_date:end_date]
+                if if_fq in ['00', 'bfq']:
+                    return data
+                else:
+                    print('CURRENTLY NOT SUPPORT REALTIME FUQUAN')
+                    return None
+                    # xdxr = QA_fetch_get_stock_xdxr(code)
+                    # if if_fq in ['01','qfq']:
+                    #     return QA_data_make_qfq(data,xdxr)
+                    # elif if_fq in ['02','hfq']:
+                    #     return QA_data_make_hfq(data,xdxr)
+        except Exception as e:
+            if isinstance(e, TypeError):
+                print('Tushare内置的pytdx版本和QUANTAXIS使用的pytdx 版本不同, 请重新安装pytdx以解决此问题')
+                print('pip uninstall pytdx')
+                print('pip install pytdx')
             else:
-                print('CURRENTLY NOT SUPPORT REALTIME FUQUAN')
-                return None
-                # xdxr = QA_fetch_get_stock_xdxr(code)
-                # if if_fq in ['01','qfq']:
-                #     return QA_data_make_qfq(data,xdxr)
-                # elif if_fq in ['02','hfq']:
-                #     return QA_data_make_hfq(data,xdxr)
-    except Exception as e:
-        if isinstance(e, TypeError):
-            print('Tushare内置的pytdx版本和QUANTAXIS使用的pytdx 版本不同, 请重新安装pytdx以解决此问题')
-            print('pip uninstall pytdx')
-            print('pip install pytdx')
-        else:
-            print(e)
-
+                print(e)
+                #2025/06/30更新：获取股票行情数据出现异常进行重试，最大重试次数为3次
+                nonlocal max_retry_cnt
+                if max_retry_cnt < 3:
+                    max_retry_cnt = max_retry_cnt + 1
+                    print('第{0}次异常重试fetch_stock_day'.format(max_retry_cnt))
+                    return __fetch_stock_day(code, start_date, end_date, if_fq,
+                           frequence, ip, port)
+                else:
+                    print("fetch_stock_data重试失败")
+                    return None
+    
+    return __fetch_stock_day(code, start_date, end_date, if_fq,
+                           frequence, ip, port)
 
 @retry(stop_max_attempt_number=3, wait_random_min=50, wait_random_max=100)
 def QA_fetch_get_stock_min(code, start, end, frequence='1min', ip=None,
@@ -2800,7 +2815,7 @@ if __name__ == '__main__':
     #rows = QA_fetch_get_commodity_option_CU_contract_time_to_market()
     #print(rows)
 
-    #print(QA_fetch_get_stock_day('000001', '2017-07-03', '2017-07-10'))
+    print(QA_fetch_get_stock_day('000633', '2025-06-27', '2025-07-01'))
     #print(QA_fetch_get_stock_day('000001', '2023-01-01', '2023-06-01'))
     # print(QA_fetch_get_stock_realtime('000001'))
    # print(QA_fetch_get_index_day('000001', '2023-01-01', '2023-06-01'))
@@ -2809,7 +2824,7 @@ if __name__ == '__main__':
     # print(QA_fetch_get_stock_info('600116'))
     #print(QA_fetch_get_stock_block())
     #print(QA_fetch_get_extensionindex_day("C_NQHK", "2025-06-27", "2025-06-27"))
-    print(QA_fetch_get_extensionindex_list())
+    #print(QA_fetch_get_extensionindex_list())
     # 【2022/06/11 fix】： 如果出现ip服务器错误，就运行下面的select_best_ip
     # best_ip = select_best_ip()
     # print(best_ip)
