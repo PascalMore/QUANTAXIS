@@ -346,6 +346,7 @@ def QA_fetch_get_stock_day(code, start_date, end_date, if_fq='00',
 
                 # 这里的问题是: 如果只取了一天的股票,而当天停牌, 那么就直接返回None了
                 if len(data) < 1:
+                    print("获取股票{}行情数据为空".format(code))
                     return None
                 data = data[data['open'] != 0]
 
@@ -377,7 +378,7 @@ def QA_fetch_get_stock_day(code, start_date, end_date, if_fq='00',
                 print('pip uninstall pytdx')
                 print('pip install pytdx')
             else:
-                print(e)
+                print("获取{}异常：{}".format(code, e))
                 #2025/06/30更新：获取股票行情数据出现异常进行重试，最大重试次数为3次
                 nonlocal max_retry_cnt
                 if max_retry_cnt < 3:
@@ -2556,7 +2557,8 @@ def QA_fetch_get_future_day(code, start_date, end_date, frequence='day',
             axis=0, sort=False)
 
         try:
-
+            #2025/07/02更新，过滤扩展指数行情数据都是0的数据，比如H11001有一天行情异常
+            data = data[data['open'] != 0]
             # 获取商品期货会报None
             data = data.assign(
                 date=data['datetime'].apply(lambda x: str(x[0:10]))).assign(
@@ -2815,7 +2817,7 @@ if __name__ == '__main__':
     #rows = QA_fetch_get_commodity_option_CU_contract_time_to_market()
     #print(rows)
 
-    print(QA_fetch_get_stock_day('000633', '2025-06-27', '2025-07-01'))
+    #print(QA_fetch_get_stock_day('000633', '2025-06-27', '2025-07-01'))
     #print(QA_fetch_get_stock_day('000001', '2023-01-01', '2023-06-01'))
     # print(QA_fetch_get_stock_realtime('000001'))
    # print(QA_fetch_get_index_day('000001', '2023-01-01', '2023-06-01'))
@@ -2823,7 +2825,7 @@ if __name__ == '__main__':
 
     # print(QA_fetch_get_stock_info('600116'))
     #print(QA_fetch_get_stock_block())
-    #print(QA_fetch_get_extensionindex_day("C_NQHK", "2025-06-27", "2025-06-27"))
+    print(QA_fetch_get_extensionindex_day("H11001", "2025-05-14", "2025-07-02"))
     #print(QA_fetch_get_extensionindex_list())
     # 【2022/06/11 fix】： 如果出现ip服务器错误，就运行下面的select_best_ip
     # best_ip = select_best_ip()
