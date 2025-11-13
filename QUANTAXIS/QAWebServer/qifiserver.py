@@ -1,17 +1,17 @@
 
-from qaenv import mongo_ip
+from qaenv import mongo_ip,mongo_uri
 from QUANTAXIS.QAWebServer.basehandles import QABaseHandler
 from QUANTAXIS.QAUtil import QA_util_to_json_from_pandas
 from QUANTAXIS.QIFI.QifiManager import QA_QIFIMANAGER, QA_QIFISMANAGER
 class QAQIFI_Handler(QABaseHandler):
     #manager = QA_QIFIMANAGER(mongo_ip)
-    manager = QA_QIFISMANAGER(mongo_ip,model='BACKTEST')
+    manager = QA_QIFISMANAGER(mongo_uri,model='BACKTEST')
 
     def get(self):
         action = self.get_argument('action', 'acchistory')
 
         acc = self.get_argument('account_cookie', 'KTKS_t01_au2012_5min')
-        manage_acc = QA_QIFIMANAGER(acc, mongo_ip)
+        manage_acc = QA_QIFIMANAGER(acc, mongo_uri)
         if action == 'acchistory':
             """
             GET http://127.0.0.1:8019/qifi?action=monthprofit
@@ -99,7 +99,7 @@ class QAQIFI_Handler(QABaseHandler):
 
 class QAQIFIS_Handler(QABaseHandler):
     #manager = QA_QIFIMANAGER(mongo_ip)
-    manager = QA_QIFISMANAGER(mongo_ip,model='BACKTEST')
+    manager = QA_QIFISMANAGER(mongo_uri,model='BACKTEST')
 
     def get(self):
         action = self.get_argument('action', 'acchistory')
@@ -136,7 +136,7 @@ class QAQIFIS_Handler(QABaseHandler):
 
 class QAQIFIS_REALTIME_Handler(QABaseHandler):
     #manager = QA_QIFIMANAGER(mongo_ip)
-    manager = QA_QIFISMANAGER(mongo_ip,model='REALTIME')
+    manager = QA_QIFISMANAGER(mongo_uri,model='REALTIME')
 
     def get(self):
         action = self.get_argument('action', 'acchistory')

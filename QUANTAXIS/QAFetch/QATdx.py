@@ -2824,8 +2824,8 @@ if __name__ == '__main__':
     # print(QA_fetch_get_stock_transaction('000001', '2017-07-03', '2017-07-10'))
 
     # print(QA_fetch_get_stock_info('600116'))
-    #print(QA_fetch_get_stock_block())
-    print(QA_fetch_get_extensionindex_day("H11001", "2025-05-14", "2025-07-02"))
+    print(QA_fetch_get_stock_block())
+    #print(QA_fetch_get_extensionindex_day("H11001", "2025-05-14", "2025-07-02"))
     #print(QA_fetch_get_extensionindex_list())
     # 【2022/06/11 fix】： 如果出现ip服务器错误，就运行下面的select_best_ip
     # best_ip = select_best_ip()
