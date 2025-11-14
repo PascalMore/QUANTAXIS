@@ -129,7 +129,7 @@ URL = "https://github.com/quantaxis/quantaxis"
 
 LICENSE = "MIT"
 
-with open('requirements.txt') as reqs_file:
+with open('requirements.txt', encoding="utf-8") as reqs_file:
     INSTALL_REQUIRES = reqs_file.readlines()
 
 setup(
