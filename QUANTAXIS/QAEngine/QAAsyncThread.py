@@ -10,7 +10,7 @@ from QUANTAXIS.QAUtil import QA_util_log_info, QA_util_random_with_topic, RUNNIN
 
 class QA_AsyncThread(threading.Thread):
     _loop = asyncio.new_event_loop()
-    _queue: QA_AsyncQueue = QA_AsyncQueue(loop=_loop)
+    _queue: QA_AsyncQueue = QA_AsyncQueue()
 
     def __init__(self, name=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
