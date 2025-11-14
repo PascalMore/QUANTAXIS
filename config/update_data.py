@@ -26,15 +26,10 @@
 
 import datetime
 import multiprocessing
-from QUANTAXIS.QASU.main import (QA_SU_save_etf_list, QA_SU_save_etf_day, QA_SU_save_index_list, QA_SU_save_index_day, QA_SU_save_extension_index_list, QA_SU_save_swindex_list, QA_SU_save_swindex_day_1, QA_SU_save_swindex_component, QA_SU_save_extension_index_day, QA_SU_save_stock_min,
+from QUANTAXIS import (QA_SU_save_etf_list, QA_SU_save_etf_day, QA_SU_save_index_list, QA_SU_save_index_day, QA_SU_save_extension_index_list, QA_SU_save_swindex_list, QA_SU_save_swindex_day_1, QA_SU_save_swindex_component, QA_SU_save_extension_index_day, QA_SU_save_stock_min,
                        QA_SU_save_stock_block, QA_SU_save_stock_day,QA_SU_save_stock_day_extend,QA_SU_save_etf_min,
                        QA_SU_save_stock_list, QA_SU_save_stock_xdxr)
 
-from QUANTAXIS.QASU.save_binance import (QA_SU_save_binance_symbol,
-                                       QA_SU_save_binance_1hour,
-                                       QA_SU_save_binance_1day, 
-                                       QA_SU_save_binance_1min, 
-                                       QA_SU_save_binance)
 
 
 def err_call_back(err):
@@ -71,51 +66,7 @@ def process(l):
         print("完成swindex_day的数据更新")
     else:
         return
-
-# print('SAVE/UPDATE {}'.format(datetime.datetime.now()))
-
-# wk = datetime.datetime.now().weekday() + 1
-# if wk == 6 or wk ==7:
-#     print('周{}不更新A股数据'.format(wk))
-#     #QA_SU_save_binance_symbol()
-#     #QA_SU_save_binance_1day()
-#     #QA_SU_save_binance_1hour()
-#     #QA_SU_save_binance('30m')
-
-# else:
-#     #1. 更新最新股票、板块、ETF、指数列表
-#     QA_SU_save_stock_list('tdx')
-#     QA_SU_save_stock_block('tdx')
-#     QA_SU_save_etf_list('tdx')
-#     QA_SU_save_index_list('tdx')
-#     # 新增扩展指数列表
-#     QA_SU_save_extension_index_list('tdx')
-#     # 新增申万行业指数以及成份股
-#     QA_SU_save_swindex_list('ak')
-#     QA_SU_save_swindex_component('ak')
-
-#     #2. 更新每日的股票行情（日、分红除权、分钟）
-#     QA_SU_save_stock_day('tdx')
-#     QA_SU_save_stock_xdxr('tdx')
     
-#     #3. 更新每日行情衍生指标(tushare)
-#     QA_SU_save_stock_day_extend('ts')
-#     #QA_SU_save_stock_min('tdx')
-
-#     #4. 更新ETF和指数日行情
-#     QA_SU_save_etf_day('tdx')
-#     QA_SU_save_index_day('tdx')
-#     QA_SU_save_extension_index_day('tdx')
-#     # 新增申万一级及二级行业指数日行情
-#     QA_SU_save_swindex_day_1('ak')
-    
-#     #5. 更新币安数字货币所数据
-#     #QA_SU_save_binance_symbol()
-#     #QA_SU_save_binance_1day()
-#     #QA_SU_save_binance_1hour()
-#     #QA_SU_save_binance('30m')
-
-# 需要生产的数据列表
 data_list = [
     'stock_day',
     'stock_xdxr',

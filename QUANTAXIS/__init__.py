@@ -228,15 +228,22 @@ from QUANTAXIS.QASetting.QALocalize import (
 )
 # save
 from QUANTAXIS.QASU.main import (
+    QA_SU_save_etf_list,
     QA_SU_save_etf_day,
     QA_SU_save_etf_min,
     QA_SU_save_financialfiles,
     QA_SU_save_future_list,
     QA_SU_save_index_day,
     QA_SU_save_index_list,
+    QA_SU_save_extension_index_list,
+    QA_SU_save_swindex_list,
+    QA_SU_save_swindex_component,
     QA_SU_save_index_min,
     QA_SU_save_stock_block,
     QA_SU_save_stock_day,
+    QA_SU_save_swindex_day_1,
+    QA_SU_save_stock_day_extend,
+    QA_SU_save_extension_index_day,
     QA_SU_save_stock_info,
     QA_SU_save_stock_info_tushare,
     QA_SU_save_stock_list,
